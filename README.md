@@ -19,3 +19,4 @@ The datasets for the training and test data are combined, and then subsetted to 
 
 From this output dataset, the means are calculated for each subject and activity combination, resulting in 180 rows of data.
 
+The output txt file is tab delimited (\t)
