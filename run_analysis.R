@@ -5,17 +5,16 @@
 ##Creates a second, independent tidy data set with the average of each variable for each activity and each subject. 
 
 setwd("C:/Users/bernidunne/Coursera/Getting_Data")
-if(!file.exists("data")){
-  dir.create("data")
-}
+
+#Download data for analysis#
 
 url <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
-download.file(url, destfile = "./data/project.zip")
-list.files("./data")
+download.file(url, destfile = "./project.zip")
 dateDownloaded <- date()
 dateDownloaded
 
-unzip("./data/project.zip", list=T)
+unzip("./project.zip", list=T)
+
 
 #read in training & test data files
 training_data <- read.table("./UCI HAR Dataset/train/X_train.txt", sep="")
@@ -35,7 +34,7 @@ names(all_subjects)[1] <- "subjects"
 
 
 
-#read in training & test activity files
+#load activity files
 training_act <- read.table("./UCI HAR Dataset/train/Y_train.txt", sep="")
 testing_act <- read.table("./UCI HAR Dataset/test/Y_test.txt", sep="")
 
@@ -51,11 +50,14 @@ names(all_activity)[1] <- "activity"
 features <- read.table("./UCI HAR Dataset/features.txt", sep="")
 features_selected <- features[grepl("mean\\(\\)|std\\(\\)",features$V2),]
 
+#use the column numbers from the table to create a vector, and just keep ones that match 
 col_vector <- features_selected[,"V1"]
 data_mean_std <- all_data[, col_vector]
 
+#add the column names to the dataset
 col_names <- features_selected[,"V2"]
 names(data_mean_std) <- col_names
+
 
 #join the tables for subjects, activities, and data points
 full_file <- cbind(all_subjects,all_activity,data_mean_std)
@@ -65,23 +67,19 @@ full_file <- cbind(all_subjects,all_activity,data_mean_std)
 activity_labels <- read.table("./UCI HAR Dataset/activity_labels.txt", sep="")
 
 
+#apply labels to the activity column
 full_file$activity <- factor(full_file$activity, levels = activity_labels$V1, labels = activity_labels$V2)
 
 
 
 #####################################################
-#Average each activity for each person
+#Calculate the average for each activity for each subject
 
-#tapply(full_file$subject,"full_file$tBodyAcc-mean()-X",mean)
-
-str(full_file)
 full_file_ordered <- full_file[order(full_file$subjects,full_file$activity),]
 
-
-attach(full_file_ordered)
-aggdata <-aggregate(full_file_ordered[3:68], by=list(subjects,activity),FUN=mean, na.rm=TRUE)
+#Take the mean of all the numeric fields (3 - 68)
+aggdata <-aggregate(full_file_ordered[3:68], by=list(full_file_ordered$subjects,full_file_ordered$activity),FUN=mean, na.rm=TRUE)
 head(aggdata)
-detach(full_file_ordered)
 
-
-write.table(aggdata, "./AvgValuesBySubject.txt", sep="\t")
+#output the file to the working directory
+write.table(aggdata, "./AvgValuesBySubject.txt", sep="\t", row.names=F)
