@@ -81,5 +81,9 @@ full_file_ordered <- full_file[order(full_file$subjects,full_file$activity),]
 aggdata <-aggregate(full_file_ordered[3:68], by=list(full_file_ordered$subjects,full_file_ordered$activity),FUN=mean, na.rm=TRUE)
 head(aggdata)
 
+names(aggdata)[1] <- "subject"
+names(aggdata)[2] <- "activity"
+
 #output the file to the working directory
 write.table(aggdata, "./AvgValuesBySubject.txt", sep="\t", row.names=F)
+
